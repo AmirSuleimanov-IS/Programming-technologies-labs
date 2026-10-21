@@ -1,5 +1,9 @@
 # Локальный запуск всего проекта: docker compose up -d --build
-# Фронтенд: http://localhost:8091, API: http://localhost:8090/api
+# Фронтенд: http://localhost:8091, API: http://localhost:8090/api,
+# Prometheus: http://localhost:9091, Grafana: http://localhost:3001 (admin / admin)
+#
+# Значения по умолчанию подходят только для локального запуска. Для настоящего сервера
+# задайте POSTGRES_PASSWORD, JWT_SECRET, ADMIN_PASSWORD и GRAFANA_PASSWORD в файле .env рядом.
 
 name: sportreg
 
@@ -27,6 +31,10 @@ services:
       DATABASE_URL: postgres://sportreg:${POSTGRES_PASSWORD:-sportreg}@db:5432/sportreg?sslmode=disable
       LOG_LEVEL: info
       SEED_DEMO: "true"
+      JWT_SECRET: ${JWT_SECRET:-local-docker-secret-change-me-0123456789}
+      JWT_TTL: 12h
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@sportreg.local}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-Admin12345}
     ports:
       - "8090:8090"
     depends_on:
@@ -40,5 +48,32 @@ services:
     depends_on:
       - backend
 
+  prometheus:
+    image: prom/prometheus:v3.5.0
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    ports:
+      - "9091:9090"
+    depends_on:
+      - backend
+
+  grafana:
+    image: grafana/grafana:12.0.2
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-admin}
+      GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH: /var/lib/grafana/dashboards/sportreg.json
+    volumes:
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana-data:/var/lib/grafana
+    ports:
+      - "3001:3000"
+    depends_on:
+      - prometheus
+
 volumes:
   db-data:
+  prometheus-data:
+  grafana-data:
