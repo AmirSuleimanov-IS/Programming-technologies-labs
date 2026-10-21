@@ -1,5 +1,8 @@
 version: "2"
 
+run:
+  build-tags: [integration] # линтер проверяет и integration-тесты
+
 # Неиспользуемые импорты и переменные Go не компилирует сам.
 # Мёртвый код (неиспользуемые функции, типы, поля, параметры, недостижимый код)
 # ловят unused, unparam и правило revive unreachable-code.
@@ -27,6 +30,11 @@ linters:
         - name: redefines-builtin-id
         - name: empty-block
         - name: blank-imports
+  exclusions:
+    rules:
+      # в тестах сигнатуры функций-заглушек задаёт тестируемый код
+      - path: _test.go
+        linters: [unparam]
 
 formatters:
   enable:

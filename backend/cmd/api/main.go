@@ -11,18 +11,14 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/redis/go-redis/v9"
 
-	"sportreg/internal/application"
-	"sportreg/internal/auth"
+	"sportreg/internal/app"
 	"sportreg/internal/cache"
 	"sportreg/internal/competition"
 	"sportreg/internal/config"
 	"sportreg/internal/database"
-	"sportreg/internal/httpapi"
 	"sportreg/internal/observability"
-	"sportreg/internal/user"
 )
 
 func main() {
@@ -62,40 +58,22 @@ func run() error {
 		}
 	}
 
-	users := user.NewRepository(pool)
-	tokens := auth.NewTokens(cfg.JWTSecret, cfg.JWTTTL)
-	authService := auth.NewService(users, tokens)
+	api := app.New(app.Deps{
+		Pool:      pool,
+		Cache:     newCache(ctx, cfg.RedisAddr),
+		JWTSecret: cfg.JWTSecret,
+		JWTTTL:    cfg.JWTTTL,
+		CacheTTL:  competition.CacheTTL{Item: cfg.CacheTTL, List: cfg.ListTTL},
+	})
 	if cfg.AdminEmail != "" {
-		if err := authService.EnsureAdmin(ctx, cfg.AdminEmail, cfg.AdminPassword); err != nil {
+		if err := api.Auth.EnsureAdmin(ctx, cfg.AdminEmail, cfg.AdminPassword); err != nil {
 			return err
 		}
 	}
-	guard := auth.NewGuard(tokens).Allow
-
-	mux := http.NewServeMux()
-	mux.HandleFunc("GET /api/health", func(w http.ResponseWriter, r *http.Request) {
-		if err := pool.Ping(r.Context()); err != nil {
-			httpapi.WriteError(w, http.StatusServiceUnavailable, "DB_UNAVAILABLE", "База данных недоступна", nil)
-			return
-		}
-		httpapi.WriteData(w, http.StatusOK, map[string]string{"status": "ok"}, nil)
-	})
-	mux.Handle("GET /metrics", promhttp.Handler())
-	auth.NewHandler(authService, users).Register(mux, guard)
-	user.NewHandler(users).Register(mux, guard)
-	competitions := competition.NewService(competition.NewRepository(pool), newCache(ctx, cfg.RedisAddr),
-		competition.CacheTTL{Item: cfg.CacheTTL, List: cfg.ListTTL})
-	competition.NewHandler(competitions).Register(mux, guard)
-	application.NewHandler(application.NewService(application.NewRepository(pool), competitions.Invalidate)).Register(mux, guard)
 
 	srv := &http.Server{
-		Addr: cfg.HTTPAddr,
-		Handler: httpapi.Chain(mux,
-			observability.Telemetry, // request_id, журнал доступа, метрики
-			httpapi.Recover,
-			httpapi.JSONErrors,
-			observability.CaptureRoute,
-		),
+		Addr:              cfg.HTTPAddr,
+		Handler:           api.Handler,
 		ReadHeaderTimeout: 5 * time.Second,
 	}
 	go func() {
