@@ -1,10 +1,11 @@
 import { useMemo, useState } from 'react'
 
-import { createCompetition, deleteCompetition, updateCompetition } from '../api/competitions-api'
-import { CompetitionForm } from '../components/elements/competition-form'
-import { CompetitionTable } from '../components/elements/competition-table'
-import { useCompetitions } from '../hooks/requests/use-competitions'
-import type { Competition, CompetitionInput } from '../types/competition'
+import { createCompetition, deleteCompetition, updateCompetition } from '../../api/competitions-api'
+import { useCompetitions } from '../../hooks/requests/use-competitions'
+import type { Competition, CompetitionInput } from '../../types/competition'
+import { CompetitionFilters } from './competition-filters'
+import { CompetitionForm } from './competition-form'
+import { CompetitionTable } from './competition-table'
 
 // Для PATCH оставляем только поля, которые пользователь действительно изменил
 function changedFields(before: Competition, after: CompetitionInput): Partial<CompetitionInput> {
@@ -13,11 +14,12 @@ function changedFields(before: Competition, after: CompetitionInput): Partial<Co
   )
 }
 
-export function CompetitionsPage() {
+// Вкладка «Соревнования» страницы администратора: каталог с созданием, изменением и удалением
+export function CompetitionsAdmin() {
   const [query, setQuery] = useState('')
   const [sport, setSport] = useState('')
   const filter = useMemo(() => ({ q: query.trim(), sport: sport.trim() }), [query, sport])
-  const { competitions, loading, error, reload } = useCompetitions(filter)
+  const { data: competitions, loading, error, reload } = useCompetitions(filter)
 
   // undefined — форма закрыта, null — создание, Competition — изменение
   const [editing, setEditing] = useState<Competition | null | undefined>(undefined)
@@ -45,9 +47,14 @@ export function CompetitionsPage() {
   }
 
   return (
-    <section>
-      <div className="page-head">
-        <h1>Соревнования</h1>
+    <>
+      <div className="toolbar">
+        <CompetitionFilters
+          query={query}
+          sport={sport}
+          onQueryChange={setQuery}
+          onSportChange={setSport}
+        />
         <button className="button" onClick={() => setEditing(null)}>
           Добавить соревнование
         </button>
@@ -62,21 +69,12 @@ export function CompetitionsPage() {
         />
       )}
 
-      <div className="filters">
-        <input
-          placeholder="Поиск по названию"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-        />
-        <input placeholder="Вид спорта" value={sport} onChange={(e) => setSport(e.target.value)} />
-      </div>
-
       {(error ?? actionError) && <p className="alert alert--error">{error ?? actionError}</p>}
       {loading ? (
         <p className="muted">Загрузка…</p>
       ) : (
         <CompetitionTable competitions={competitions} onEdit={setEditing} onDelete={handleDelete} />
       )}
-    </section>
+    </>
   )
 }

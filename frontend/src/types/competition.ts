@@ -5,6 +5,7 @@ export interface Competition {
   location: string
   starts_on: string // ГГГГ-ММ-ДД
   capacity: number
+  free_places: number // лимит минус одобренные заявки
   description: string
   created_at: string
   updated_at: string

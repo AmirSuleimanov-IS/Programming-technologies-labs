@@ -20,6 +20,7 @@ export function CompetitionTable({ competitions, onEdit, onDelete }: Competition
           <th>Дата</th>
           <th>Место</th>
           <th className="table__num">Мест</th>
+          <th className="table__num">Свободно</th>
           <th />
         </tr>
       </thead>
@@ -34,6 +35,7 @@ export function CompetitionTable({ competitions, onEdit, onDelete }: Competition
             <td className="nowrap">{formatDate(c.starts_on)}</td>
             <td>{c.location}</td>
             <td className="table__num">{c.capacity}</td>
+            <td className="table__num">{c.free_places}</td>
             <td>
               <div className="table__actions">
                 <button className="button button--small" onClick={() => onEdit(c)}>

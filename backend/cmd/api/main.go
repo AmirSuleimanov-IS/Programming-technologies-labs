@@ -37,8 +37,10 @@ func run() error {
 	}
 	logger, raised := observability.NewLogger(os.Stdout, cfg.Env == config.EnvProduction, cfg.LogLevel)
 	slog.SetDefault(logger)
+	logLevel := cfg.LogLevel
 	if raised {
-		slog.Warn("LOG_LEVEL below info is not allowed in production, using info", "requested", cfg.LogLevel.String())
+		slog.Warn("LOG_LEVEL below info is not allowed in production, using info", "requested", logLevel.String())
+		logLevel = slog.LevelInfo
 	}
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
@@ -99,7 +101,7 @@ func run() error {
 		_ = srv.Shutdown(shutdownCtx)
 	}()
 
-	slog.Info("server started", "addr", cfg.HTTPAddr, "env", cfg.Env, "log_level", cfg.LogLevel.String())
+	slog.Info("server started", "addr", cfg.HTTPAddr, "env", cfg.Env, "log_level", logLevel.String())
 	if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 		return err
 	}

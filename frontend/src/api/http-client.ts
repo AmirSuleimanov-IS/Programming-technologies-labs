@@ -16,6 +16,19 @@ export class ApiError extends Error {
   }
 }
 
+let authToken: string | null = null
+let onUnauthorized: () => void = () => {}
+
+// Токен подставляется в заголовок Authorization каждого запроса
+export function setAuthToken(token: string | null): void {
+  authToken = token
+}
+
+// Что делать, если сервер ответил 401 (токен истёк или недействителен)
+export function setUnauthorizedHandler(handler: () => void): void {
+  onUnauthorized = handler
+}
+
 type Method = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
 
 export async function request<T, M = unknown>(
@@ -25,9 +38,12 @@ export async function request<T, M = unknown>(
 ): Promise<ApiSuccess<T, M>> {
   let response: Response
   try {
+    const headers: Record<string, string> = {}
+    if (body !== undefined) headers['Content-Type'] = 'application/json'
+    if (authToken) headers.Authorization = `Bearer ${authToken}`
     response = await fetch(API_URL + path, {
       method,
-      headers: body === undefined ? undefined : { 'Content-Type': 'application/json' },
+      headers,
       body: body === undefined ? undefined : JSON.stringify(body),
     })
   } catch {
@@ -38,6 +54,7 @@ export async function request<T, M = unknown>(
     return { data: undefined as T }
   }
   const json = await response.json().catch(() => null)
+  if (response.status === 401 && authToken) onUnauthorized()
   if (!response.ok) {
     throw new ApiError(
       response.status,
