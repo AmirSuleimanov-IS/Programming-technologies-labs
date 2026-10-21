@@ -1,0 +1,35 @@
+[
+  {
+    "method": "POST",
+    "path": "/auth/login",
+    "saveToken": "user",
+    "quiet": true,
+    "body": { "email": "ivan.petrov@mail.ru", "password": "Sport2026" }
+  },
+  {
+    "title": "Redis остановлен: первый запрос — ошибка кэша, ответ из БД (BYPASS)",
+    "method": "GET",
+    "path": "/competitions/1",
+    "token": "user",
+    "headers": ["X-Cache"],
+    "time": true,
+    "pick": ["data.title", "meta"]
+  },
+  {
+    "title": "Следующие 5 с Redis не опрашивается — ответ из БД без ожидания",
+    "method": "GET",
+    "path": "/competitions?q=первенство",
+    "token": "user",
+    "headers": ["X-Cache"],
+    "time": true,
+    "pick": ["data.length", "meta"]
+  },
+  {
+    "method": "GET",
+    "path": "/competitions/2",
+    "token": "user",
+    "headers": ["X-Cache"],
+    "time": true,
+    "pick": ["meta"]
+  }
+]

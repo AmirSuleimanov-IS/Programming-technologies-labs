@@ -37,6 +37,8 @@ const scenarios = [
   [2, () => call('GET', '/applications', { token: admin })],
   [2, () => call('POST', '/applications', { token: pick(users), body: { competition_id: 5 } })],
   [1, () => call('GET', '/users', { token: pick(users) })], // 403
+  // администратор меняет соревнование — инвалидация кэша
+  [1, () => call('PATCH', '/competitions/5', { token: admin, body: { description: `Дистанции 3 и 10 км, обновлено ${new Date().toLocaleTimeString('ru-RU')}` } })],
 ]
 const total = scenarios.reduce((s, [w]) => s + w, 0)
 

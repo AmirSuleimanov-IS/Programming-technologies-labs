@@ -1,0 +1,109 @@
+[
+  {
+    "method": "POST",
+    "path": "/auth/login",
+    "saveToken": "user",
+    "quiet": true,
+    "body": { "email": "ivan.petrov@mail.ru", "password": "Sport2026" }
+  },
+  {
+    "method": "POST",
+    "path": "/auth/login",
+    "saveToken": "admin",
+    "quiet": true,
+    "body": { "email": "admin@sportreg.local", "password": "Admin12345" }
+  },
+  {
+    "title": "1. Первое чтение соревнования — промах (MISS), ответ из БД",
+    "method": "GET",
+    "path": "/competitions/3",
+    "token": "user",
+    "headers": ["X-Cache"],
+    "time": true,
+    "pick": ["data.title", "data.free_places", "meta"]
+  },
+  {
+    "title": "2. Повторное чтение — попадание (HIT), ответ из Redis",
+    "method": "GET",
+    "path": "/competitions/3",
+    "token": "user",
+    "headers": ["X-Cache"],
+    "time": true,
+    "pick": ["data.title", "data.free_places", "meta"]
+  },
+  {
+    "title": "3. Каталог с фильтром — MISS",
+    "method": "GET",
+    "path": "/competitions?sport=футбол",
+    "token": "user",
+    "headers": ["X-Cache"],
+    "time": true,
+    "pick": ["data.length", "meta"]
+  },
+  {
+    "title": "4. Тот же фильтр в другом регистре — HIT (ключ нормализован)",
+    "method": "GET",
+    "path": "/competitions?sport=ФУТБОЛ",
+    "token": "user",
+    "headers": ["X-Cache"],
+    "time": true,
+    "pick": ["data.length", "meta"]
+  },
+  {
+    "title": "5. Пользователь подаёт заявку, администратор одобряет",
+    "method": "POST",
+    "path": "/applications",
+    "token": "user",
+    "saveAs": "a",
+    "pick": ["data.status"],
+    "body": { "competition_id": 3 }
+  },
+  {
+    "method": "PATCH",
+    "path": "/applications/{a}",
+    "token": "admin",
+    "pick": ["data.status"],
+    "body": { "status": "approved" }
+  },
+  {
+    "title": "6. Свободных мест стало меньше — кэш сброшен, MISS и свежие данные",
+    "method": "GET",
+    "path": "/competitions/3",
+    "token": "user",
+    "headers": ["X-Cache"],
+    "time": true,
+    "pick": ["data.free_places", "meta"]
+  },
+  {
+    "title": "7. Каталог тоже сброшен (новая версия списков) — MISS",
+    "method": "GET",
+    "path": "/competitions?sport=футбол",
+    "token": "user",
+    "headers": ["X-Cache"],
+    "pick": ["data.0.free_places", "meta"]
+  },
+  {
+    "title": "8. Администратор меняет соревнование — инвалидация",
+    "method": "PATCH",
+    "path": "/competitions/3",
+    "token": "admin",
+    "pick": ["data.capacity"],
+    "body": { "capacity": 48 }
+  },
+  {
+    "title": "9. Чтение после изменения — MISS, новые данные",
+    "method": "GET",
+    "path": "/competitions/3",
+    "token": "user",
+    "headers": ["X-Cache"],
+    "pick": ["data.capacity", "data.free_places", "meta"]
+  },
+  {
+    "title": "10. И снова HIT",
+    "method": "GET",
+    "path": "/competitions/3",
+    "token": "user",
+    "headers": ["X-Cache"],
+    "pick": ["data.capacity", "meta"]
+  }
+]

@@ -1,0 +1,25 @@
+[
+  {
+    "method": "POST",
+    "path": "/auth/login",
+    "saveToken": "user",
+    "quiet": true,
+    "body": { "email": "ivan.petrov@mail.ru", "password": "Sport2026" }
+  },
+  {
+    "title": "CACHE_ITEM_TTL=5s: первый запрос — MISS",
+    "method": "GET",
+    "path": "/competitions/5",
+    "token": "user",
+    "headers": ["X-Cache"],
+    "pick": ["meta"]
+  },
+  {
+    "title": "Сразу же — HIT",
+    "method": "GET",
+    "path": "/competitions/5",
+    "token": "user",
+    "headers": ["X-Cache"],
+    "pick": ["meta"]
+  }
+]

@@ -183,6 +183,7 @@ def build(spec_path, out_path):
         elif kind == "h2":
             par = doc.add_paragraph()
             fmt_par(par, first_line=True)
+            par.paragraph_format.keep_with_next = True  # подзаголовок не остаётся один внизу страницы
             set_run_font(par.add_run(b[1]), bold=True)
         elif kind == "p":
             par = doc.add_paragraph()

@@ -2,7 +2,8 @@
 // Использование: node api-demo.mjs <steps.json> [baseUrl]
 // Шаг: { "title", "method", "path", "body" | "raw", "token", "headers": ["X-Cache"],
 //        "saveAs": "имя" (запомнить data.id), "saveToken": "имя" (запомнить data.token),
-//        "short": N (показать N строк тела), "quiet": true (не печатать шаг) }
+//        "short": N (показать N строк тела), "pick": ["data.free_places", "meta"] (показать только эти поля),
+//        "quiet": true (не печатать шаг) }
 // В path и token можно подставлять запомненное: "/competitions/{c1}", "token": "admin".
 // Тело уходит в UTF-8 (curl в Windows портит кириллицу в аргументах).
 import fs from 'node:fs'
@@ -40,6 +41,10 @@ for (const step of steps) {
   console.log(`HTTP ${res.status} ${res.statusText}${step.time ? `  (${ms} мс)` : ''}`)
   if (shown.length) console.log(shown.join('\n'))
   let out = json ? JSON.stringify(json, null, 2) : text
+  if (step.pick && json) {
+    const get = (p) => p.split('.').reduce((v, k) => (v == null ? v : v[k]), json)
+    out = step.pick.map((p) => `${p} = ${JSON.stringify(get(p))}`).join('\n')
+  }
   if (step.short && out) {
     const lines = out.split('\n')
     if (lines.length > step.short) out = lines.slice(0, step.short).join('\n') + '\n  …'

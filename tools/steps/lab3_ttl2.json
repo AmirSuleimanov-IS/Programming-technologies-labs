@@ -1,0 +1,17 @@
+[
+  {
+    "method": "POST",
+    "path": "/auth/login",
+    "saveToken": "user",
+    "quiet": true,
+    "body": { "email": "ivan.petrov@mail.ru", "password": "Sport2026" }
+  },
+  {
+    "title": "Через 6 с запись истекла — снова MISS",
+    "method": "GET",
+    "path": "/competitions/5",
+    "token": "user",
+    "headers": ["X-Cache"],
+    "pick": ["meta"]
+  }
+]

@@ -26,7 +26,7 @@ if (page.url().includes('change-password')) {
   await page.click('text=Skip').catch(() => {})
   await page.waitForTimeout(1500)
 }
-await page.setViewportSize({ width: 1600, height: 1450 })
+await page.setViewportSize({ width: 1600, height: 1900 })
 await page.goto('http://127.0.0.1:3001/d/sportreg-overview?orgId=1&from=now-5m&to=now&kiosk')
 await page.waitForTimeout(8000)
 await page.screenshot({ path: `${outDir}/grafana_dashboard.png` })
