@@ -10,6 +10,7 @@
 | 1. Первичная настройка проекта                           | `lab1-initial-setup`   | [reports/lab_1](reports/lab_1) |
 | 2. Авторизация, ролевая модель, логирование и мониторинг | `lab2-auth-monitoring` | [reports/lab_2](reports/lab_2) |
 | 3. Кэширование                                           | `lab3-caching`         | [reports/lab_3](reports/lab_3) |
+| 4. Тестирование                                          | `lab4-testing`         | [reports/lab_4](reports/lab_4) |
 
 `main` — итоговое состояние после последней лабораторной.
 
@@ -19,7 +20,8 @@
 .
 ├── backend/                 # REST API на Go (свой README, Dockerfile, линтер, .env)
 ├── frontend/                # SPA на React + TypeScript + Vite (свой README, Dockerfile, линтер, .env)
-├── docs/adr/                # записи об архитектурных решениях
+├── .github/workflows/ci.yml # CI: линтеры, unit- и integration-тесты, сборка
+├── docs/                    # план тестового покрытия (test-plan.md), записи о решениях (adr/)
 ├── monitoring/              # Prometheus (prometheus.yml) и Grafana (источник данных, дашборд)
 ├── reports/lab_N/           # отчёт .docx, исходник отчёта spec.py, скриншоты img/
 ├── scripts/                 # обёртки для хуков pre-commit
@@ -53,6 +55,10 @@ docker compose up -d --build
 Порты на хосте сдвинуты от стандартных (5432 → 5436 и т. д.), чтобы не конфликтовать с уже установленными сервисами. Значения по умолчанию в `docker-compose.yml` подходят только для локального запуска. Для сервера задайте `POSTGRES_PASSWORD`, `JWT_SECRET`, `ADMIN_PASSWORD` и `GRAFANA_PASSWORD` в файле `.env` рядом с `docker-compose.yml`.
 
 Запуск для разработки без Docker — в `backend/README.md` и `frontend/README.md`.
+
+## Тесты
+
+Бэкенд: `cd backend && scripts/test.sh unit` (быстро, без Docker) и `scripts/test.sh integration` (PostgreSQL и Redis в контейнерах, нужен Docker), остальные группы — в `backend/README.md`. Фронтенд: `cd frontend && npm test`. План тестового покрытия — [docs/test-plan.md](docs/test-plan.md). Все проверки запускаются в GitHub Actions на каждый push (`.github/workflows/ci.yml`).
 
 ## Pre-commit
 
