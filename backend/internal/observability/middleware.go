@@ -27,6 +27,12 @@ func (s *statusRecorder) Write(b []byte) (int, error) {
 	return s.ResponseWriter.Write(b)
 }
 
+// serviceRoutes — служебные маршруты, успешные запросы к которым пишутся только на уровне DEBUG.
+var serviceRoutes = map[string]bool{
+	"GET /metrics":    true,
+	"GET /api/health": true,
+}
+
 // Telemetry — внешняя middleware: присваивает запросу request_id, а после ответа
 // пишет строку журнала доступа и обновляет метрики.
 func Telemetry(next http.Handler) http.Handler {
@@ -65,6 +71,8 @@ func Telemetry(next http.Handler) http.Handler {
 			level = slog.LevelError
 		case rec.status >= 400:
 			level = slog.LevelWarn
+		case serviceRoutes[route]:
+			level = slog.LevelDebug // Prometheus опрашивает /metrics каждые 5 с — в production это шум
 		}
 		slog.Log(ctx, level, "http request",
 			"method", r.Method,
