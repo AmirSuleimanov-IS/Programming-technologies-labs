@@ -1,0 +1,44 @@
+# Локальный запуск всего проекта: docker compose up -d --build
+# Фронтенд: http://localhost:8091, API: http://localhost:8090/api
+
+name: sportreg
+
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: sportreg
+      POSTGRES_USER: sportreg
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-sportreg}
+    ports:
+      - "5436:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sportreg -d sportreg"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  backend:
+    build: ./backend
+    environment:
+      APP_ENV: production
+      DATABASE_URL: postgres://sportreg:${POSTGRES_PASSWORD:-sportreg}@db:5432/sportreg?sslmode=disable
+      LOG_LEVEL: info
+      SEED_DEMO: "true"
+    ports:
+      - "8090:8090"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "8091:80"
+    depends_on:
+      - backend
+
+volumes:
+  db-data:
