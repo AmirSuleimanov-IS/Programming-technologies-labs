@@ -1,9 +1,16 @@
 #!/usr/bin/env bash
-# Перезапускает локальный бэкенд (go run, режим development) с логом в tools/raw/backend_dev.log
+# Перезапускает локальный бэкенд (режим development) с логом в tools/raw/backend_dev.log.
+# Останавливается только собственный tools/raw/api.exe. Если порт 8090 занят чем-то другим
+# (например, прокси портов Docker Desktop для контейнера backend), скрипт не трогает этот
+# процесс — его завершение роняет Docker Desktop — и сообщает об ошибке.
 set -euo pipefail
 cd "$(dirname "$0")/.."
-pid=$(netstat -ano | grep ":8090 .*LISTENING" | awk '{print $5}' | head -1 || true)
-if [ -n "$pid" ]; then taskkill //F //PID "$pid" > /dev/null; fi
+taskkill //F //IM api.exe > /dev/null 2>&1 || true
+sleep 1
+if netstat -ano | grep -q ":8090 .*LISTENING"; then
+  echo "port 8090 is busy (docker compose backend?): run 'docker compose stop backend' first"
+  exit 1
+fi
 cd backend
 go build -o ../tools/raw/api.exe ./cmd/api
 (../tools/raw/api.exe > ../tools/raw/backend_dev.log 2>&1 &)
