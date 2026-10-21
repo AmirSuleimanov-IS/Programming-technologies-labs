@@ -6,20 +6,20 @@
 
 - [x] Задания и лекции из репозитория курса прочитаны
 - [x] NOTES.md (дерево решений), CONTEXT.md (глоссарий), ADR 0001
-- [ ] Инструменты: pre-commit, golangci-lint, python-docx, Playwright + Edge, генератор отчётов
-- [ ] git init, .gitattributes (LF), корневой .gitignore
+- [x] Инструменты: pre-commit, golangci-lint, python-docx, Playwright + Edge, генератор отчётов
+- [x] git init, .gitattributes (LF), корневой .gitignore
 
 ## Лаба 1 — первичная настройка (ветка `lab1-initial-setup`)
 
-- [ ] Бэкенд Go: CRUD соревнований (GET, POST, PUT, PATCH, DELETE), единый формат ответов и ошибок, PostgreSQL, миграции
-- [ ] Фронтенд React+TS+Vite: страница соревнований (список, создание, изменение, удаление)
-- [ ] Линтеры и форматтеры: golangci-lint + gofmt, ESLint + Prettier + knip, ignore-файлы
-- [ ] pre-commit: большие файлы, конфликты, линтер/форматтер, неиспользуемый код, имена файлов
-- [ ] .env development/production для обеих частей
-- [ ] Dockerfile ×2, docker-compose (db, backend, frontend)
-- [ ] README: корень, backend, frontend (структура, запуск, технологии со ссылками, env, соглашения, неочевидные решения)
-- [ ] Проверка: сборка, линтеры, docker compose up, ручной прогон API, демонстрация срабатывания каждого хука
-- [ ] Скриншоты и отчёт lab_1
+- [x] Бэкенд Go: CRUD соревнований (GET, POST, PUT, PATCH, DELETE), единый формат ответов и ошибок, PostgreSQL, миграции
+- [x] Фронтенд React+TS+Vite: страница соревнований (список, создание, изменение, удаление)
+- [x] Линтеры и форматтеры: golangci-lint + gofmt, ESLint + Prettier + knip, ignore-файлы
+- [x] pre-commit: большие файлы, конфликты, линтер/форматтер, неиспользуемый код, имена файлов
+- [x] .env development/production для обеих частей
+- [x] Dockerfile ×2, docker-compose (db, backend, frontend)
+- [x] README: корень, backend, frontend (структура, запуск, технологии со ссылками, env, соглашения, неочевидные решения)
+- [x] Проверка: сборка, линтеры, docker compose up, ручной прогон API, демонстрация срабатывания каждого хука
+- [x] Скриншоты и отчёт lab_1
 
 ## Лаба 2 — авторизация, роли, логи, мониторинг (ветка `lab2-auth-monitoring`)
 
