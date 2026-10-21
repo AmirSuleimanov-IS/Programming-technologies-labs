@@ -18,7 +18,7 @@ import sys
 
 from docx import Document
 from docx.enum.table import WD_TABLE_ALIGNMENT
-from docx.enum.text import WD_ALIGN_PARAGRAPH, WD_BREAK
+from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 from docx.shared import Cm, Pt, RGBColor
@@ -80,11 +80,6 @@ def add_numpr(par, num_id):
     numpr.append(ilvl)
     numpr.append(nid)
     ppr.append(numpr)
-
-
-def page_break(doc):
-    par = doc.add_paragraph()
-    par.add_run().add_break(WD_BREAK.PAGE)
 
 
 def add_rich(par, text, size=14, mono=False):
@@ -176,11 +171,12 @@ def build(spec_path, out_path):
     for b in blocks:
         kind = b[0]
         if kind == "h":
-            if not first_heading:
-                page_break(doc)
-            first_heading = False
             par = doc.add_paragraph(style="Heading 1")
             fmt_par(par, align=WD_ALIGN_PARAGRAPH.CENTER, first_line=False, after=12)
+            # разрыв страницы — свойство заголовка, а не отдельный абзац: иначе после
+            # раздела, закончившегося ровно в конце страницы, появлялась пустая страница
+            par.paragraph_format.page_break_before = not first_heading
+            first_heading = False
             run = par.add_run(b[1])
             set_run_font(run, size=16, bold=True)
             run.font.color.rgb = RGBColor(0, 0, 0)

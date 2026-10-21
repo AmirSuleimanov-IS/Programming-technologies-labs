@@ -1,0 +1,53 @@
+[
+  {
+    "method": "POST",
+    "path": "/auth/login",
+    "saveToken": "user",
+    "quiet": true,
+    "body": { "email": "ivan.petrov@mail.ru", "password": "Sport2026" }
+  },
+  {
+    "method": "POST",
+    "path": "/auth/login",
+    "saveToken": "admin",
+    "quiet": true,
+    "body": { "email": "admin@sportreg.local", "password": "Admin12345" }
+  },
+  {
+    "title": "USER читает каталог — 200",
+    "method": "GET",
+    "path": "/competitions?q=шахмат",
+    "token": "user"
+  },
+  {
+    "title": "USER создаёт соревнование — 403",
+    "method": "POST",
+    "path": "/competitions",
+    "token": "user",
+    "body": {
+      "title": "Мой турнир",
+      "sport": "Шахматы",
+      "location": "Норильск",
+      "starts_on": "2026-12-01",
+      "capacity": 8
+    }
+  },
+  {
+    "title": "USER открывает список пользователей — 403",
+    "method": "GET",
+    "path": "/users",
+    "token": "user"
+  },
+  {
+    "title": "Поддельный токен — 401",
+    "method": "GET",
+    "path": "/competitions",
+    "token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwicm9sZSI6IkFETUlOIn0.forged"
+  },
+  {
+    "title": "ADMIN открывает список пользователей — 200",
+    "method": "GET",
+    "path": "/users",
+    "token": "admin"
+  }
+]

@@ -1,0 +1,62 @@
+[
+  {
+    "title": "Каталог без токена — 401",
+    "method": "GET",
+    "path": "/competitions",
+    "headers": ["WWW-Authenticate"]
+  },
+  {
+    "title": "Регистрация пользователя — 201, роль USER",
+    "method": "POST",
+    "path": "/auth/register",
+    "body": {
+      "email": "Ivan.Petrov@mail.ru",
+      "full_name": "Иван Петров",
+      "password": "Sport2026"
+    }
+  },
+  {
+    "title": "Повторная регистрация того же email — 409",
+    "method": "POST",
+    "path": "/auth/register",
+    "body": {
+      "email": "ivan.petrov@mail.ru",
+      "full_name": "Иван Петров",
+      "password": "Sport2026"
+    }
+  },
+  {
+    "title": "Слабый пароль и неверный email — 422",
+    "method": "POST",
+    "path": "/auth/register",
+    "body": { "email": "anna@", "full_name": "Анна", "password": "1234567" }
+  },
+  {
+    "title": "Вход с неверным паролем — 401",
+    "method": "POST",
+    "path": "/auth/login",
+    "body": { "email": "ivan.petrov@mail.ru", "password": "wrong-pass1" }
+  },
+  {
+    "title": "Вход пользователя — 200, JWT",
+    "method": "POST",
+    "path": "/auth/login",
+    "saveToken": "user",
+    "short": 9,
+    "body": { "email": "ivan.petrov@mail.ru", "password": "Sport2026" }
+  },
+  {
+    "title": "Вход администратора",
+    "method": "POST",
+    "path": "/auth/login",
+    "saveToken": "admin",
+    "quiet": true,
+    "body": { "email": "admin@sportreg.local", "password": "Admin12345" }
+  },
+  {
+    "title": "Кто я — по токену",
+    "method": "GET",
+    "path": "/auth/me",
+    "token": "user"
+  }
+]

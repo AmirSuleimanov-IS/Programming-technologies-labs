@@ -1,0 +1,113 @@
+[
+  {
+    "method": "POST",
+    "path": "/auth/login",
+    "saveToken": "user",
+    "quiet": true,
+    "body": { "email": "ivan.petrov@mail.ru", "password": "Sport2026" }
+  },
+  {
+    "method": "POST",
+    "path": "/auth/login",
+    "saveToken": "admin",
+    "quiet": true,
+    "body": { "email": "admin@sportreg.local", "password": "Admin12345" }
+  },
+  {
+    "method": "POST",
+    "path": "/auth/register",
+    "quiet": true,
+    "body": {
+      "email": "olga.smirnova@mail.ru",
+      "full_name": "Ольга Смирнова",
+      "password": "Chess2026"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/auth/login",
+    "saveToken": "olga",
+    "quiet": true,
+    "body": { "email": "olga.smirnova@mail.ru", "password": "Chess2026" }
+  },
+  {
+    "title": "Иван подаёт заявку на шахматный турнир (3 места) — 201",
+    "method": "POST",
+    "path": "/applications",
+    "token": "user",
+    "saveAs": "a1",
+    "body": { "competition_id": 4 }
+  },
+  {
+    "title": "Повторная заявка — 409",
+    "method": "POST",
+    "path": "/applications",
+    "token": "user",
+    "body": { "competition_id": 4 }
+  },
+  {
+    "title": "Иван пытается сам одобрить заявку — 403",
+    "method": "PATCH",
+    "path": "/applications/{a1}",
+    "token": "user",
+    "body": { "status": "approved" }
+  },
+  {
+    "method": "POST",
+    "path": "/applications",
+    "token": "olga",
+    "saveAs": "a2",
+    "quiet": true,
+    "body": { "competition_id": 4 }
+  },
+  {
+    "title": "Администратор одобряет заявку Ивана — 200",
+    "method": "PATCH",
+    "path": "/applications/{a1}",
+    "token": "admin",
+    "body": { "status": "approved" },
+    "short": 14
+  },
+  {
+    "method": "PATCH",
+    "path": "/applications/{a2}",
+    "token": "admin",
+    "quiet": true,
+    "body": { "status": "approved" }
+  },
+  {
+    "title": "Свободных мест осталось 1 из 3",
+    "method": "GET",
+    "path": "/competitions/4",
+    "token": "user",
+    "short": 12
+  },
+  {
+    "title": "Лимит меньше числа одобренных (2) — 409",
+    "method": "PATCH",
+    "path": "/competitions/4",
+    "token": "admin",
+    "body": { "capacity": 1 }
+  },
+  {
+    "title": "Удаление соревнования с активными заявками — 409",
+    "method": "DELETE",
+    "path": "/competitions/4",
+    "token": "admin"
+  },
+  {
+    "title": "Иван отменяет свою заявку — 200",
+    "method": "PATCH",
+    "path": "/applications/{a1}",
+    "token": "user",
+    "body": { "status": "cancelled" },
+    "short": 14
+  },
+  {
+    "title": "Отменённую заявку одобрить нельзя — 409",
+    "method": "PATCH",
+    "path": "/applications/{a1}",
+    "token": "admin",
+    "body": { "status": "approved" }
+  }
+]
