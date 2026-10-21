@@ -8,6 +8,7 @@ import {
 import { ApplicationsTable } from '../components/elements/applications-table'
 import { CompetitionCard } from '../components/elements/competition-card'
 import { CompetitionFilters } from '../components/elements/competition-filters'
+import { SourceBadge } from '../components/ui/source-badge'
 import { StatusBadge } from '../components/ui/status-badge'
 import { useCompetitions } from '../hooks/requests/use-competitions'
 import { useRequest } from '../hooks/requests/use-request'
@@ -71,6 +72,11 @@ export function UserPage() {
         sport={sport}
         onQueryChange={setQuery}
         onSportChange={setSport}
+      />
+      <SourceBadge
+        source={competitions.source}
+        ageMs={competitions.ageMs}
+        onRefresh={competitions.refresh}
       />
       {competitions.error && <p className="alert alert--error">{competitions.error}</p>}
       {competitions.loading ? (

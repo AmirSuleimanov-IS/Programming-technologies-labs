@@ -3,6 +3,7 @@ import { useMemo, useState } from 'react'
 import { createCompetition, deleteCompetition, updateCompetition } from '../../api/competitions-api'
 import { useCompetitions } from '../../hooks/requests/use-competitions'
 import type { Competition, CompetitionInput } from '../../types/competition'
+import { SourceBadge } from '../ui/source-badge'
 import { CompetitionFilters } from './competition-filters'
 import { CompetitionForm } from './competition-form'
 import { CompetitionTable } from './competition-table'
@@ -19,7 +20,15 @@ export function CompetitionsAdmin() {
   const [query, setQuery] = useState('')
   const [sport, setSport] = useState('')
   const filter = useMemo(() => ({ q: query.trim(), sport: sport.trim() }), [query, sport])
-  const { data: competitions, loading, error, reload } = useCompetitions(filter)
+  const {
+    data: competitions,
+    source,
+    ageMs,
+    loading,
+    error,
+    reload,
+    refresh,
+  } = useCompetitions(filter)
 
   // undefined — форма закрыта, null — создание, Competition — изменение
   const [editing, setEditing] = useState<Competition | null | undefined>(undefined)
@@ -69,6 +78,7 @@ export function CompetitionsAdmin() {
         />
       )}
 
+      <SourceBadge source={source} ageMs={ageMs} onRefresh={refresh} />
       {(error ?? actionError) && <p className="alert alert--error">{error ?? actionError}</p>}
       {loading ? (
         <p className="muted">Загрузка…</p>

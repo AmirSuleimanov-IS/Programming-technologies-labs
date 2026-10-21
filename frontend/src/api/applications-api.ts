@@ -1,4 +1,5 @@
 import type { Application, ApplicationStatus } from '../types/application'
+import { invalidateCompetitions } from './competitions-api'
 import { request } from './http-client'
 
 export async function fetchMyApplications(): Promise<Application[]> {
@@ -17,6 +18,7 @@ export async function fetchApplications(status = ''): Promise<Application[]> {
 
 export async function submitApplication(competitionId: number): Promise<Application> {
   const res = await request<Application>('POST', '/applications', { competition_id: competitionId })
+  invalidateCompetitions()
   return res.data
 }
 
@@ -25,5 +27,6 @@ export async function changeApplicationStatus(
   status: Exclude<ApplicationStatus, 'pending'>,
 ): Promise<Application> {
   const res = await request<Application>('PATCH', `/applications/${id}`, { status })
+  invalidateCompetitions() // одобрение и отмена меняют число свободных мест
   return res.data
 }

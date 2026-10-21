@@ -521,3 +521,34 @@ select:focus {
 .toolbar .filters {
   flex: 1;
 }
+
+/* Источник данных (кэш браузера, Redis или база данных) */
+.source {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 14px;
+  margin-bottom: 16px;
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+  border-left-width: 4px;
+  background: var(--color-surface);
+  font-size: 14px;
+}
+
+.source--browser {
+  border-left-color: #7c3aed;
+}
+
+.source--hit {
+  border-left-color: var(--color-success);
+}
+
+.source--miss {
+  border-left-color: var(--color-warning);
+}
+
+.source--bypass {
+  border-left-color: var(--color-danger);
+}

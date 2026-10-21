@@ -4,6 +4,7 @@ import { login as loginRequest } from '../../api/auth-api'
 import { setAuthToken, setUnauthorizedHandler } from '../../api/http-client'
 import { AuthContext } from '../../hooks/auth-context'
 import type { Session, User } from '../../types/user'
+import { queryCache } from '../../utils/query-cache'
 import { clearSession, loadSession, saveSession } from '../../utils/session-storage'
 
 function restoreSession(): Session | null {
@@ -16,7 +17,10 @@ function restoreSession(): Session | null {
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(restoreSession)
 
+  // Кэш браузера очищается при входе и выходе: следующий пользователь за этим компьютером
+  // не должен видеть данные, загруженные предыдущим
   const logout = useCallback(() => {
+    queryCache.clear()
     clearSession()
     setAuthToken(null)
     setSession(null)
@@ -24,6 +28,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = useCallback(async (email: string, password: string): Promise<User> => {
     const next = await loginRequest(email, password)
+    queryCache.clear()
     saveSession(next)
     setAuthToken(next.token)
     setSession(next)
