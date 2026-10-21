@@ -34,13 +34,15 @@ export function CompetitionTable({ competitions, onEdit, onDelete }: Competition
             <td className="nowrap">{formatDate(c.starts_on)}</td>
             <td>{c.location}</td>
             <td className="table__num">{c.capacity}</td>
-            <td className="table__actions">
-              <button className="button button--small" onClick={() => onEdit(c)}>
-                Изменить
-              </button>
-              <button className="button button--small button--danger" onClick={() => onDelete(c)}>
-                Удалить
-              </button>
+            <td>
+              <div className="table__actions">
+                <button className="button button--small" onClick={() => onEdit(c)}>
+                  Изменить
+                </button>
+                <button className="button button--small button--danger" onClick={() => onDelete(c)}>
+                  Удалить
+                </button>
+              </div>
             </td>
           </tr>
         ))}
