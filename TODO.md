@@ -35,12 +35,12 @@
 
 ## Лаба 3 — кэширование (ветка `lab3-caching`)
 
-- [ ] Redis в compose, модуль кэша с логами и метриками
-- [ ] Cache-aside для соревнования и списка, TTL с джиттером, инвалидация (delete on write + versioned keys), singleflight, fail-open
-- [ ] X-Cache и meta.cache в ответах
-- [ ] Кэш на фронтенде с TTL и инвалидацией, индикатор источника данных
-- [ ] Панели кэша в Grafana
-- [ ] Проверка (hit/miss/invalidate/TTL/отказ Redis), скриншоты, отчёт lab_3
+- [x] Redis в compose, модуль кэша с логами и метриками
+- [x] Cache-aside для соревнования и списка, TTL с джиттером, инвалидация (delete on write + versioned keys), singleflight, fail-open
+- [x] X-Cache и meta.cache в ответах
+- [x] Кэш на фронтенде с TTL и инвалидацией, индикатор источника данных
+- [x] Панели кэша в Grafana
+- [x] Проверка (hit/miss/invalidate/TTL/отказ Redis), скриншоты, отчёт lab_3
 
 ## Лаба 4 — тестирование (ветка `lab4-testing`)
 
