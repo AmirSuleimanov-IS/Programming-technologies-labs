@@ -28,6 +28,10 @@ type Config struct {
 	JWTTTL        time.Duration
 	AdminEmail    string // первый администратор создаётся при старте, если задан
 	AdminPassword string
+
+	RedisAddr string        // пусто — кэш выключен
+	CacheTTL  time.Duration // одно соревнование
+	ListTTL   time.Duration // результаты поиска по каталогу
 }
 
 const minJWTSecretLen = 32
@@ -57,17 +61,24 @@ func Load() (Config, error) {
 	}
 
 	// С пустым или коротким ключом токены можно подобрать, поэтому сервер не запускается
+	var err error
 	cfg.JWTSecret = os.Getenv("JWT_SECRET")
 	if len(cfg.JWTSecret) < minJWTSecretLen {
 		return Config{}, fmt.Errorf("JWT_SECRET должен быть не короче %d символов", minJWTSecretLen)
 	}
-	ttl, err := time.ParseDuration(getenv("JWT_TTL", "12h"))
-	if err != nil || ttl <= 0 {
-		return Config{}, fmt.Errorf("JWT_TTL: ожидается длительность вида 12h")
+	if cfg.JWTTTL, err = duration("JWT_TTL", "12h"); err != nil {
+		return Config{}, err
 	}
-	cfg.JWTTTL = ttl
 	cfg.AdminEmail = os.Getenv("ADMIN_EMAIL")
 	cfg.AdminPassword = os.Getenv("ADMIN_PASSWORD")
+
+	cfg.RedisAddr = os.Getenv("REDIS_ADDR")
+	if cfg.CacheTTL, err = duration("CACHE_ITEM_TTL", "5m"); err != nil {
+		return Config{}, err
+	}
+	if cfg.ListTTL, err = duration("CACHE_LIST_TTL", "60s"); err != nil {
+		return Config{}, err
+	}
 	return cfg, nil
 }
 
@@ -76,4 +87,12 @@ func getenv(key, fallback string) string {
 		return v
 	}
 	return fallback
+}
+
+func duration(key, fallback string) (time.Duration, error) {
+	d, err := time.ParseDuration(getenv(key, fallback))
+	if err != nil || d <= 0 {
+		return 0, fmt.Errorf("%s: ожидается положительная длительность вида 30s, 5m, 12h", key)
+	}
+	return d, nil
 }

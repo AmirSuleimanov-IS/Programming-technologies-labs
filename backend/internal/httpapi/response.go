@@ -68,6 +68,8 @@ func statusOf(kind apperr.Kind) int {
 
 func writeJSON(w http.ResponseWriter, status int, body any) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	// Ответы API не кэширует ни браузер, ни прокси: кэшированием управляют Redis и кэш клиента
+	w.Header().Set("Cache-Control", "no-store")
 	w.WriteHeader(status)
 	if err := json.NewEncoder(w).Encode(body); err != nil {
 		slog.Error("write response", "error", err)

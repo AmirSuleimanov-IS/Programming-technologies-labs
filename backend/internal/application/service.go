@@ -21,10 +21,16 @@ type Store interface {
 type Service struct {
 	store Store
 	now   func() time.Time
+	// onFreePlacesChanged вызывается, когда меняется число одобренных заявок соревнования:
+	// свободные места в кэше каталога устарели. В main сюда передаётся competition.Service.Invalidate.
+	onFreePlacesChanged func(ctx context.Context, competitionID int64)
 }
 
-func NewService(store Store) *Service {
-	return &Service{store: store, now: time.Now}
+func NewService(store Store, onFreePlacesChanged func(ctx context.Context, competitionID int64)) *Service {
+	if onFreePlacesChanged == nil {
+		onFreePlacesChanged = func(context.Context, int64) {}
+	}
+	return &Service{store: store, now: time.Now, onFreePlacesChanged: onFreePlacesChanged}
 }
 
 func (s *Service) ListMine(ctx context.Context, actor user.Current) ([]Application, error) {
@@ -94,6 +100,9 @@ func (s *Service) ChangeStatus(ctx context.Context, actor user.Current, id int64
 	})
 	if err != nil {
 		return Application{}, err
+	}
+	if to == StatusApproved || from == StatusApproved {
+		s.onFreePlacesChanged(ctx, updated.CompetitionID)
 	}
 	slog.InfoContext(ctx, "application status changed", "application_id", id,
 		"competition_id", updated.CompetitionID, "from", from, "to", to)

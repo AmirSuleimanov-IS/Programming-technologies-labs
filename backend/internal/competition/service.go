@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"sportreg/internal/apperr"
+	"sportreg/internal/cache"
 )
 
 // Store — то, что сервису нужно от хранилища. В тестах его заменяет подделка.
@@ -21,20 +22,22 @@ type Store interface {
 // Service — бизнес-логика каталога соревнований.
 type Service struct {
 	store Store
+	cache *cache.Client // nil — без кэша
+	ttl   CacheTTL
 	now   func() time.Time
 }
 
-func NewService(store Store) *Service {
-	return &Service{store: store, now: time.Now}
+func NewService(store Store, c *cache.Client, ttl CacheTTL) *Service {
+	return &Service{store: store, cache: c, ttl: ttl, now: time.Now}
 }
 
-func (s *Service) List(ctx context.Context, f Filter) ([]Competition, error) {
-	return s.store.List(ctx, f)
+// List и Get читают через кэш (cache-aside) и сообщают, откуда пришли данные.
+func (s *Service) List(ctx context.Context, f Filter) ([]Competition, cache.Source, error) {
+	return s.loadList(ctx, f)
 }
 
-func (s *Service) Get(ctx context.Context, id int64) (Competition, error) {
-	c, err := s.store.Get(ctx, id)
-	return c, mapErr(err)
+func (s *Service) Get(ctx context.Context, id int64) (Competition, cache.Source, error) {
+	return s.loadItem(ctx, id)
 }
 
 func (s *Service) Create(ctx context.Context, in Input) (Competition, error) {
@@ -49,6 +52,7 @@ func (s *Service) Create(ctx context.Context, in Input) (Competition, error) {
 	if err != nil {
 		return Competition{}, err
 	}
+	s.Invalidate(ctx, 0) // нового соревнования ещё нет в кэше, но оно должно появиться в списках
 	slog.InfoContext(ctx, "competition created", "competition_id", created.ID, "title", created.Title)
 	return created, nil
 }
@@ -83,6 +87,7 @@ func (s *Service) update(ctx context.Context, current, next Competition) (Compet
 	if err != nil {
 		return Competition{}, mapErr(err)
 	}
+	s.Invalidate(ctx, updated.ID)
 	slog.InfoContext(ctx, "competition updated", "competition_id", updated.ID)
 	return updated, nil
 }
@@ -91,6 +96,7 @@ func (s *Service) Delete(ctx context.Context, id int64) error {
 	if err := s.store.Delete(ctx, id); err != nil {
 		return mapErr(err)
 	}
+	s.Invalidate(ctx, id)
 	slog.InfoContext(ctx, "competition deleted", "competition_id", id)
 	return nil
 }

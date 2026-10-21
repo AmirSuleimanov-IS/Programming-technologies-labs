@@ -4,8 +4,10 @@ import (
 	"context"
 	"net/http"
 	"strconv"
+	"strings"
 	"unicode/utf8"
 
+	"sportreg/internal/cache"
 	"sportreg/internal/httpapi"
 	"sportreg/internal/user"
 )
@@ -38,12 +40,12 @@ func (h *Handler) list(w http.ResponseWriter, r *http.Request) {
 		httpapi.WriteError(w, http.StatusBadRequest, "BAD_REQUEST", "Параметры запроса должны быть в кодировке UTF-8", nil)
 		return
 	}
-	list, err := h.svc.List(r.Context(), f)
+	list, src, err := h.svc.List(r.Context(), f)
 	if err != nil {
 		httpapi.WriteAppError(w, r, err)
 		return
 	}
-	httpapi.WriteData(w, http.StatusOK, list, map[string]int{"count": len(list)})
+	httpapi.WriteData(w, http.StatusOK, list, withSource(w, src, map[string]any{"count": len(list)}))
 }
 
 func (h *Handler) get(w http.ResponseWriter, r *http.Request) {
@@ -51,12 +53,12 @@ func (h *Handler) get(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	c, err := h.svc.Get(r.Context(), id)
+	c, src, err := h.svc.Get(r.Context(), id)
 	if err != nil {
 		httpapi.WriteAppError(w, r, err)
 		return
 	}
-	httpapi.WriteData(w, http.StatusOK, c, nil)
+	httpapi.WriteData(w, http.StatusOK, c, withSource(w, src, map[string]any{}))
 }
 
 func (h *Handler) create(w http.ResponseWriter, r *http.Request) {
@@ -108,4 +110,18 @@ func (h *Handler) delete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.WriteHeader(http.StatusNoContent)
+}
+
+// withSource показывает клиенту, откуда пришли данные: заголовок X-Cache (HIT, MISS, BYPASS)
+// и поле meta.cache в теле ответа.
+func withSource(w http.ResponseWriter, src cache.Source, meta map[string]any) map[string]any {
+	if src == "" {
+		if len(meta) == 0 {
+			return nil
+		}
+		return meta
+	}
+	w.Header().Set("X-Cache", strings.ToUpper(string(src)))
+	meta["cache"] = src
+	return meta
 }

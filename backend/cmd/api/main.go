@@ -12,9 +12,11 @@ import (
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/redis/go-redis/v9"
 
 	"sportreg/internal/application"
 	"sportreg/internal/auth"
+	"sportreg/internal/cache"
 	"sportreg/internal/competition"
 	"sportreg/internal/config"
 	"sportreg/internal/database"
@@ -81,8 +83,10 @@ func run() error {
 	mux.Handle("GET /metrics", promhttp.Handler())
 	auth.NewHandler(authService, users).Register(mux, guard)
 	user.NewHandler(users).Register(mux, guard)
-	competition.NewHandler(competition.NewService(competition.NewRepository(pool))).Register(mux, guard)
-	application.NewHandler(application.NewService(application.NewRepository(pool))).Register(mux, guard)
+	competitions := competition.NewService(competition.NewRepository(pool), newCache(ctx, cfg.RedisAddr),
+		competition.CacheTTL{Item: cfg.CacheTTL, List: cfg.ListTTL})
+	competition.NewHandler(competitions).Register(mux, guard)
+	application.NewHandler(application.NewService(application.NewRepository(pool), competitions.Invalidate)).Register(mux, guard)
 
 	srv := &http.Server{
 		Addr: cfg.HTTPAddr,
@@ -106,4 +110,27 @@ func run() error {
 		return err
 	}
 	return nil
+}
+
+// newCache подключает Redis. Если адрес не задан, кэш выключен. Если Redis недоступен
+// при старте, сервер всё равно запускается: кэш работает в режиме fail-open.
+func newCache(ctx context.Context, addr string) *cache.Client {
+	if addr == "" {
+		slog.Warn("REDIS_ADDR is empty, cache disabled")
+		return nil
+	}
+	rdb := redis.NewClient(&redis.Options{
+		Addr:          addr,
+		DialTimeout:   300 * time.Millisecond, // при недоступном Redis запрос не должен зависать
+		ReadTimeout:   200 * time.Millisecond,
+		WriteTimeout:  200 * time.Millisecond,
+		MaxRetries:    -1, // без повторов: при ошибке запрос сразу идёт в БД
+		DialerRetries: 1,  // по умолчанию 5 попыток соединения — секунды ожидания
+	})
+	if err := rdb.Ping(ctx).Err(); err != nil {
+		slog.Error("redis is unavailable, requests will go to the database", "addr", addr, "error", err)
+	} else {
+		slog.Info("redis connected", "addr", addr)
+	}
+	return cache.New(rdb)
 }
