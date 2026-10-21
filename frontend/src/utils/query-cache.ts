@@ -7,7 +7,7 @@ interface Entry {
 // Кэш ответов API в памяти вкладки по стратегии cache-aside с TTL. Живёт до перезагрузки
 // страницы и не попадает в localStorage: данные не переживают сессию и не остаются на чужом компьютере.
 // Каждая операция пишется в консоль браузера — так видно, откуда пришли данные.
-class QueryCache {
+export class QueryCache {
   private readonly entries = new Map<string, Entry>()
   private readonly now: () => number
 

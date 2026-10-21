@@ -3,17 +3,11 @@ import { useMemo, useState } from 'react'
 import { createCompetition, deleteCompetition, updateCompetition } from '../../api/competitions-api'
 import { useCompetitions } from '../../hooks/requests/use-competitions'
 import type { Competition, CompetitionInput } from '../../types/competition'
+import { changedFields } from '../../utils/changed-fields'
 import { SourceBadge } from '../ui/source-badge'
 import { CompetitionFilters } from './competition-filters'
 import { CompetitionForm } from './competition-form'
 import { CompetitionTable } from './competition-table'
-
-// Для PATCH оставляем только поля, которые пользователь действительно изменил
-function changedFields(before: Competition, after: CompetitionInput): Partial<CompetitionInput> {
-  return Object.fromEntries(
-    Object.entries(after).filter(([key, value]) => before[key as keyof CompetitionInput] !== value),
-  )
-}
 
 // Вкладка «Соревнования» страницы администратора: каталог с созданием, изменением и удалением
 export function CompetitionsAdmin() {

@@ -78,6 +78,10 @@ npm run dev          # http://localhost:5173, запросы /api проксир
 | `npm run typecheck`               | TypeScript без сборки                                 |
 | `npm run knip`                    | поиск неиспользуемых файлов, экспортов и зависимостей |
 
+## Тесты
+
+`npm test` — unit-тесты Vitest (`src/**/*.test.ts`, рядом с кодом): кэш браузера (TTL, инвалидация, объединение одинаковых запросов), матрица доступа к страницам, отбор изменённых полей для PATCH. `npm run test:watch` — перезапуск при изменениях, `npx vitest run cache` — только тесты с «cache» в имени файла. План покрытия — [docs/test-plan.md](../docs/test-plan.md).
+
 ## Технологии
 
 | Технология                    | Зачем                                   | Документация                                                    |
@@ -90,6 +94,7 @@ npm run dev          # http://localhost:5173, запросы /api проксир
 | eslint-plugin-unused-imports  | удаление неиспользуемых импортов        | https://github.com/sweepline/eslint-plugin-unused-imports       |
 | Prettier 3                    | форматтер                               | https://prettier.io/docs/                                       |
 | knip                          | поиск мёртвого кода                     | https://knip.dev/                                               |
+| Vitest                        | unit-тесты                              | https://vitest.dev/                                             |
 | nginx                         | раздача сборки и прокси `/api` в Docker | https://nginx.org/ru/docs/                                      |
 
 ## Переменные окружения
