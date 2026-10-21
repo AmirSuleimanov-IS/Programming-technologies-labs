@@ -1,0 +1,85 @@
+# Проверки перед каждым коммитом (https://pre-commit.com).
+# Установка: pip install pre-commit && pre-commit install
+# Ручной прогон по всем файлам: pre-commit run --all-files
+#
+# Форматтеры и eslint --fix исправляют файлы сами. Если хук изменил файлы, pre-commit
+# останавливает коммит: проверьте правки (git diff), добавьте их (git add) и повторите коммит.
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: check-added-large-files
+        name: большие файлы (код и конфиги, не больше 500 КБ)
+        args: [--maxkb=500]
+        exclude: ^reports/
+      - id: check-added-large-files
+        name: большие файлы (отчёты со скриншотами, не больше 5 МБ)
+        args: [--maxkb=5120]
+        files: ^reports/
+      - id: check-merge-conflict
+        name: маркеры неразрешённых конфликтов
+      - id: check-case-conflict
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+        args: [--markdown-linebreak-ext=md]
+      - id: mixed-line-ending
+        args: [--fix=lf]
+        exclude: \.ps1$
+      - id: check-yaml
+      - id: check-json
+        exclude: tsconfig.*\.json$ # в tsconfig разрешены комментарии
+
+  - repo: local
+    hooks:
+      # Стандарт имён файлов. Хук language: fail срабатывает на каждый файл,
+      # который подходит под files и НЕ подходит под exclude (то есть назван неправильно).
+      - id: file-names-go
+        name: имена файлов Go в snake_case
+        language: fail
+        entry: "Имена файлов Go пишутся в snake_case: competition_handler.go"
+        files: ^backend/.*\.go$
+        exclude: ^backend/([a-z0-9_]+/)*[a-z0-9]+(_[a-z0-9]+)*\.go$
+      - id: file-names-frontend
+        name: имена файлов и папок frontend/src в kebab-case
+        language: fail
+        entry: "Файлы и папки в frontend/src пишутся в kebab-case: competition-form.tsx"
+        files: ^frontend/src/
+        exclude: ^frontend/src/([a-z0-9]+(-[a-z0-9]+)*/)*[a-z0-9]+(-[a-z0-9]+)*(\.[a-z0-9]+)+$
+
+      # Бэкенд: форматтер и линтер
+      - id: gofmt
+        name: gofmt (форматирование Go)
+        language: system
+        entry: gofmt -l -w
+        files: ^backend/.*\.go$
+      - id: golangci-lint
+        name: golangci-lint (ошибки, стиль, неиспользуемый код Go)
+        language: system
+        entry: scripts/lint-backend.sh
+        files: ^backend/
+        pass_filenames: false
+
+      # Фронтенд: форматтер, линтер, типы, мёртвый код
+      - id: prettier
+        name: prettier (форматирование фронтенда)
+        language: system
+        entry: scripts/in-frontend.sh prettier --write --ignore-unknown
+        files: ^frontend/
+        exclude: ^frontend/package-lock\.json$
+      - id: eslint
+        name: eslint (линтер, неиспользуемые импорты и переменные)
+        language: system
+        entry: scripts/in-frontend.sh eslint --fix --max-warnings=0
+        files: ^frontend/.*\.(ts|tsx|js)$
+      - id: tsc
+        name: tsc (проверка типов, недостижимый код)
+        language: system
+        entry: scripts/in-frontend.sh tsc -b --noEmit
+        files: ^frontend/.*\.(ts|tsx)$
+        pass_filenames: false
+      - id: knip
+        name: knip (неиспользуемые файлы, экспорты и зависимости)
+        language: system
+        entry: scripts/in-frontend.sh knip
+        files: ^frontend/
+        pass_filenames: false
