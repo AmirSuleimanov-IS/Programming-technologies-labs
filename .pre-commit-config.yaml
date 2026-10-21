@@ -18,6 +18,7 @@ repos:
         files: ^reports/
       - id: check-merge-conflict
         name: маркеры неразрешённых конфликтов
+        args: [--assume-in-merge] # проверять всегда, а не только во время git merge
       - id: check-case-conflict
       - id: end-of-file-fixer
       - id: trailing-whitespace
