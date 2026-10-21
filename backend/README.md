@@ -52,28 +52,28 @@ go build ./...
 
 ## Технологии
 
-| Технология | Зачем | Документация |
-|---|---|---|
+| Технология          | Зачем                                                                      | Документация                                      |
+| ------------------- | -------------------------------------------------------------------------- | ------------------------------------------------- |
 | Go 1.26, `net/http` | язык и HTTP-сервер; маршруты с методами и `{id}` из стандартной библиотеки | https://go.dev/doc/ , https://pkg.go.dev/net/http |
-| `log/slog` | структурированные логи в JSON | https://pkg.go.dev/log/slog |
-| PostgreSQL 17 | хранение данных | https://www.postgresql.org/docs/17/ |
-| pgx v5 | драйвер PostgreSQL и пул соединений | https://github.com/jackc/pgx |
-| godotenv | чтение файлов `.env.*` | https://github.com/joho/godotenv |
-| gofmt | форматтер (встроен в Go) | https://pkg.go.dev/cmd/gofmt |
-| golangci-lint v2 | линтер (набор анализаторов) | https://golangci-lint.run/ |
-| Docker | сборка образа | https://docs.docker.com/ |
+| `log/slog`          | структурированные логи в JSON                                              | https://pkg.go.dev/log/slog                       |
+| PostgreSQL 17       | хранение данных                                                            | https://www.postgresql.org/docs/17/               |
+| pgx v5              | драйвер PostgreSQL и пул соединений                                        | https://github.com/jackc/pgx                      |
+| godotenv            | чтение файлов `.env.*`                                                     | https://github.com/joho/godotenv                  |
+| gofmt               | форматтер (встроен в Go)                                                   | https://pkg.go.dev/cmd/gofmt                      |
+| golangci-lint v2    | линтер (набор анализаторов)                                                | https://golangci-lint.run/                        |
+| Docker              | сборка образа                                                              | https://docs.docker.com/                          |
 
 ## Переменные окружения
 
 Файл выбирается по `APP_ENV`: `.env.development` или `.env.production`. Переменные, уже заданные в окружении процесса (например, в `docker-compose.yml`), важнее значений из файла.
 
-| Переменная | По умолчанию | Описание |
-|---|---|---|
-| `APP_ENV` | `development` | `development` или `production` |
-| `HTTP_ADDR` | `:8090` | адрес HTTP-сервера |
-| `DATABASE_URL` | — (обязательна) | строка подключения PostgreSQL |
-| `LOG_LEVEL` | `info` | `debug`, `info`, `warn`, `error` |
-| `SEED_DEMO` | `false` | `true` — заполнить пустой каталог демо-данными |
+| Переменная     | По умолчанию    | Описание                                       |
+| -------------- | --------------- | ---------------------------------------------- |
+| `APP_ENV`      | `development`   | `development` или `production`                 |
+| `HTTP_ADDR`    | `:8090`         | адрес HTTP-сервера                             |
+| `DATABASE_URL` | — (обязательна) | строка подключения PostgreSQL                  |
+| `LOG_LEVEL`    | `info`          | `debug`, `info`, `warn`, `error`               |
+| `SEED_DEMO`    | `false`         | `true` — заполнить пустой каталог демо-данными |
 
 ## API
 
@@ -87,25 +87,25 @@ go build ./...
              "details": [ { "field": "capacity", "message": "от 1 до 1000" } ] } }
 ```
 
-| Метод | URL | Описание | Успех |
-|---|---|---|---|
-| GET | `/api/health` | проверка сервера и БД | 200 |
-| GET | `/api/competitions?q=&sport=` | каталог: поиск по названию, фильтр по виду спорта | 200 |
-| GET | `/api/competitions/{id}` | одно соревнование | 200 |
-| POST | `/api/competitions` | создать (все поля, кроме `description`, обязательны) | 201 + `Location` |
-| PUT | `/api/competitions/{id}` | заменить целиком | 200 |
-| PATCH | `/api/competitions/{id}` | изменить переданные поля | 200 |
-| DELETE | `/api/competitions/{id}` | удалить | 204 |
+| Метод  | URL                           | Описание                                             | Успех            |
+| ------ | ----------------------------- | ---------------------------------------------------- | ---------------- |
+| GET    | `/api/health`                 | проверка сервера и БД                                | 200              |
+| GET    | `/api/competitions?q=&sport=` | каталог: поиск по названию, фильтр по виду спорта    | 200              |
+| GET    | `/api/competitions/{id}`      | одно соревнование                                    | 200              |
+| POST   | `/api/competitions`           | создать (все поля, кроме `description`, обязательны) | 201 + `Location` |
+| PUT    | `/api/competitions/{id}`      | заменить целиком                                     | 200              |
+| PATCH  | `/api/competitions/{id}`      | изменить переданные поля                             | 200              |
+| DELETE | `/api/competitions/{id}`      | удалить                                              | 204              |
 
 Коды ошибок:
 
-| Код | `error.code` | Когда |
-|---|---|---|
-| 400 | `BAD_REQUEST` | некорректный JSON, неизвестное поле, нечисловой `id`, параметры не в UTF-8 |
-| 404 | `NOT_FOUND` | нет такого соревнования или маршрута |
-| 405 | `METHOD_NOT_ALLOWED` | метод не поддерживается для маршрута |
-| 422 | `VALIDATION_ERROR` | поля не прошли проверку (список в `details`) |
-| 500 | `INTERNAL_ERROR` | непредвиденная ошибка (подробности только в логе) |
+| Код | `error.code`         | Когда                                                                      |
+| --- | -------------------- | -------------------------------------------------------------------------- |
+| 400 | `BAD_REQUEST`        | некорректный JSON, неизвестное поле, нечисловой `id`, параметры не в UTF-8 |
+| 404 | `NOT_FOUND`          | нет такого соревнования или маршрута                                       |
+| 405 | `METHOD_NOT_ALLOWED` | метод не поддерживается для маршрута                                       |
+| 422 | `VALIDATION_ERROR`   | поля не прошли проверку (список в `details`)                               |
+| 500 | `INTERNAL_ERROR`     | непредвиденная ошибка (подробности только в логе)                          |
 
 Правила полей соревнования: `title` 3–100 символов, `sport` 2–50, `location` 2–100, `description` до 1000, `capacity` 1–1000, `starts_on` — дата `ГГГГ-ММ-ДД` не раньше сегодняшней.
 

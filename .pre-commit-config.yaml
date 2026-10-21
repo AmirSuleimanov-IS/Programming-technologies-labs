@@ -59,6 +59,14 @@ repos:
         files: ^backend/
         pass_filenames: false
 
+      # Документация и конфиги вне frontend/ (README, docker-compose, .golangci.yml…)
+      - id: prettier-docs
+        name: prettier (документация и конфиги)
+        language: system
+        entry: node frontend/node_modules/prettier/bin/prettier.cjs --write --ignore-unknown
+        types_or: [markdown, yaml, json]
+        exclude: ^(frontend|reports)/
+
       # Фронтенд: форматтер, линтер, типы, мёртвый код
       - id: prettier
         name: prettier (форматирование фронтенда)
