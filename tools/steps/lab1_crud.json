@@ -1,0 +1,49 @@
+[
+  {
+    "title": "Список соревнований с фильтром по виду спорта",
+    "method": "GET",
+    "path": "/competitions?sport=Волейбол"
+  },
+  {
+    "title": "Создание (POST) — 201 и заголовок Location",
+    "method": "POST",
+    "path": "/competitions",
+    "headers": ["Location"],
+    "saveAs": "c",
+    "body": {
+      "title": "Турнир по настольному теннису",
+      "sport": "Настольный теннис",
+      "location": "Норильск, спорткомплекс ЗГУ",
+      "starts_on": "2026-11-20",
+      "capacity": 32
+    }
+  },
+  {
+    "title": "Частичное изменение (PATCH) — только лимит мест",
+    "method": "PATCH",
+    "path": "/competitions/{c}",
+    "body": { "capacity": 48 }
+  },
+  {
+    "title": "Полная замена (PUT) — описание не передано и станет пустым",
+    "method": "PUT",
+    "path": "/competitions/{c}",
+    "body": {
+      "title": "Кубок ЗГУ по настольному теннису",
+      "sport": "Настольный теннис",
+      "location": "Норильск, спорткомплекс ЗГУ",
+      "starts_on": "2026-11-21",
+      "capacity": 48
+    }
+  },
+  {
+    "title": "Удаление (DELETE) — 204 без тела",
+    "method": "DELETE",
+    "path": "/competitions/{c}"
+  },
+  {
+    "title": "Повторное чтение удалённого — 404",
+    "method": "GET",
+    "path": "/competitions/{c}"
+  }
+]
