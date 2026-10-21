@@ -8,8 +8,9 @@ REST API системы записи на спортивные соревнов�
 
 ```
 backend/
-├── cmd/api/main.go            # точка входа: конфигурация, БД, маршруты, HTTP-сервер
+├── cmd/api/main.go            # точка входа: конфигурация, логгер, БД, HTTP-сервер
 ├── internal/
+│   ├── app/                   # сборка приложения: модули, маршруты, middleware (main и тесты)
 │   ├── apperr/                # ошибки бизнес-логики (вид ошибки → HTTP-код)
 │   ├── application/           # модуль «Заявки»: статусная модель (rules.go), транзакции с блокировкой
 │   ├── auth/                  # регистрация, вход, bcrypt, JWT, Guard (проверка роли)
@@ -25,6 +26,8 @@ backend/
 │   ├── httpapi/               # общий формат ответов, разбор JSON, middleware
 │   ├── observability/         # логгер slog, request_id, журнал доступа, метрики Prometheus
 │   └── user/                  # учётные записи, роли, текущий пользователь запроса
+├── scripts/test.sh            # запуск тестов по группам
+├── tests/integration/         # integration-тесты (build-тег integration)
 ├── .env.development           # настройки разработки (в git)
 ├── .env.production.example    # образец настроек production
 ├── .golangci.yml              # правила линтера
@@ -55,6 +58,22 @@ go build ./...
 
 Запуск в production-режиме: `APP_ENV=production go run ./cmd/api` (нужен `.env.production` или переменные окружения).
 
+## Тесты
+
+План покрытия, приоритеты и что не покрыто — [docs/test-plan.md](../docs/test-plan.md).
+
+| Группа             | Что                                                                                                    | Команда (из папки backend)                             |
+| ------------------ | ------------------------------------------------------------------------------------------------------ | ------------------------------------------------------ |
+| unit               | правила, сервисы с подделками хранилищ, кэш на miniredis — без Docker, секунды                         | `scripts/test.sh unit` или `go test ./internal/...`    |
+| integration        | HTTP API + PostgreSQL + Redis в контейнерах testcontainers (основная БД не используется), нужен Docker | `scripts/test.sh integration`                          |
+| smoke              | сервер, БД, вход, каталог                                                                              | `scripts/test.sh smoke`                                |
+| scenario           | «успешная заявка» от регистрации до одобрения                                                          | `scripts/test.sh scenario`                             |
+| regression         | всё вместе                                                                                             | `scripts/test.sh regression`                           |
+| validation, access | проверки входных данных; права и статусы                                                               | `scripts/test.sh validation`, `scripts/test.sh access` |
+| по сущностям       | auth, competitions, applications, cache                                                                | `scripts/test.sh competitions`                         |
+
+Unit-тесты лежат рядом с кодом (`internal/**/*_test.go`), integration — в `tests/integration` под build-тегом `integration`, поэтому обычный `go test ./...` их не запускает. Имена integration-тестов начинаются с группы: `TestCompetitions_`, `TestApplications_`, `TestAuth_`, `TestCache_`, `TestSmoke_`, `TestScenario_`. В CI (GitHub Actions) обе группы запускаются на каждый push.
+
 ## Технологии
 
 | Технология               | Зачем                                                                      | Документация                                               |
@@ -66,6 +85,9 @@ go build ./...
 | Prometheus client_golang | метрики и эндпоинт `/metrics`                                              | https://github.com/prometheus/client_golang                |
 | Redis 7.4, go-redis v9   | кэш                                                                        | https://redis.io/docs/latest/ , https://redis.uptrace.dev/ |
 | x/sync/singleflight      | объединение одновременных промахов кэша                                    | https://pkg.go.dev/golang.org/x/sync/singleflight          |
+| testing, httptest        | unit-тесты (стандартная библиотека)                                        | https://pkg.go.dev/testing                                 |
+| miniredis                | Redis в памяти для unit-тестов кэша                                        | https://github.com/alicebob/miniredis                      |
+| testcontainers-go        | PostgreSQL и Redis в контейнерах для integration-тестов                    | https://golang.testcontainers.org/                         |
 | PostgreSQL 17            | хранение данных                                                            | https://www.postgresql.org/docs/17/                        |
 | pgx v5                   | драйвер PostgreSQL и пул соединений                                        | https://github.com/jackc/pgx                               |
 | godotenv                 | чтение файлов `.env.*`                                                     | https://github.com/joho/godotenv                           |
