@@ -1,0 +1,11 @@
+# Инструменты для отчётов (окружения и черновые снимки)
+tools/.venv/
+tools/node_modules/
+tools/raw/
+~$*.docx
+
+# ОС и редакторы
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
