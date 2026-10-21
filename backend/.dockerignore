@@ -1,0 +1,9 @@
+bin/
+*.exe
+*.test
+*.out
+.env.production
+.env.local
+README.md
+.golangci.yml
+tests/
