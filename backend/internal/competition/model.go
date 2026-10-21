@@ -11,6 +11,7 @@ type Competition struct {
 	Location    string    `json:"location"`
 	StartsOn    string    `json:"starts_on"` // дата в формате ГГГГ-ММ-ДД
 	Capacity    int       `json:"capacity"`
+	FreePlaces  int       `json:"free_places"` // лимит минус одобренные заявки
 	Description string    `json:"description"`
 	CreatedAt   time.Time `json:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at"`

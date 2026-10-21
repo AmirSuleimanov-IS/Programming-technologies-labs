@@ -4,7 +4,6 @@ import (
 	"log/slog"
 	"net/http"
 	"strings"
-	"time"
 )
 
 type Middleware func(http.Handler) http.Handler
@@ -17,24 +16,6 @@ func Chain(h http.Handler, mws ...Middleware) http.Handler {
 	return h
 }
 
-// statusRecorder запоминает код ответа, чтобы его можно было записать в лог.
-type statusRecorder struct {
-	http.ResponseWriter
-	status int
-}
-
-func (s *statusRecorder) WriteHeader(code int) {
-	s.status = code
-	s.ResponseWriter.WriteHeader(code)
-}
-
-func (s *statusRecorder) Write(b []byte) (int, error) {
-	if s.status == 0 {
-		s.status = http.StatusOK
-	}
-	return s.ResponseWriter.Write(b)
-}
-
 // Recover превращает панику в ответ 500 и запись уровня ERROR.
 func Recover(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -45,21 +26,6 @@ func Recover(next http.Handler) http.Handler {
 			}
 		}()
 		next.ServeHTTP(w, r)
-	})
-}
-
-// AccessLog пишет одну строку на запрос: метод, путь, код ответа и длительность.
-func AccessLog(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		start := time.Now()
-		rec := &statusRecorder{ResponseWriter: w}
-		next.ServeHTTP(rec, r)
-		slog.InfoContext(r.Context(), "http request",
-			"method", r.Method,
-			"path", r.URL.Path,
-			"status", rec.status,
-			"duration_ms", time.Since(start).Milliseconds(),
-		)
 	})
 }
 

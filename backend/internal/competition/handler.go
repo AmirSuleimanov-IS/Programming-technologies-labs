@@ -7,6 +7,7 @@ import (
 	"unicode/utf8"
 
 	"sportreg/internal/httpapi"
+	"sportreg/internal/user"
 )
 
 // Handler — REST-контроллер каталога соревнований.
@@ -18,13 +19,16 @@ func NewHandler(svc *Service) *Handler {
 	return &Handler{svc: svc}
 }
 
-func (h *Handler) Register(mux *http.ServeMux) {
-	mux.HandleFunc("GET /api/competitions", h.list)
-	mux.HandleFunc("GET /api/competitions/{id}", h.get)
-	mux.HandleFunc("POST /api/competitions", h.create)
-	mux.HandleFunc("PUT /api/competitions/{id}", h.replace)
-	mux.HandleFunc("PATCH /api/competitions/{id}", h.patch)
-	mux.HandleFunc("DELETE /api/competitions/{id}", h.delete)
+// Register подключает маршруты: смотреть каталог могут USER и ADMIN, менять — только ADMIN.
+func (h *Handler) Register(mux *http.ServeMux, guard user.Guard) {
+	anyone := guard(user.RoleUser, user.RoleAdmin)
+	admin := guard(user.RoleAdmin)
+	mux.Handle("GET /api/competitions", anyone(http.HandlerFunc(h.list)))
+	mux.Handle("GET /api/competitions/{id}", anyone(http.HandlerFunc(h.get)))
+	mux.Handle("POST /api/competitions", admin(http.HandlerFunc(h.create)))
+	mux.Handle("PUT /api/competitions/{id}", admin(http.HandlerFunc(h.replace)))
+	mux.Handle("PATCH /api/competitions/{id}", admin(http.HandlerFunc(h.patch)))
+	mux.Handle("DELETE /api/competitions/{id}", admin(http.HandlerFunc(h.delete)))
 }
 
 func (h *Handler) list(w http.ResponseWriter, r *http.Request) {

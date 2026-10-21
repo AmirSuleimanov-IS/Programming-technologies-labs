@@ -52,3 +52,11 @@ func As(err error) (*Error, bool) {
 	ok := errors.As(err, &appErr)
 	return appErr, ok
 }
+
+func Unauthorized(message string) *Error {
+	return &Error{Kind: KindUnauthorized, Code: "UNAUTHORIZED", Message: message}
+}
+
+func Forbidden(message string) *Error {
+	return &Error{Kind: KindForbidden, Code: "FORBIDDEN", Message: message}
+}

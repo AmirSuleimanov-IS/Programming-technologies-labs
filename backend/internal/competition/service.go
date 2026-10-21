@@ -34,7 +34,7 @@ func (s *Service) List(ctx context.Context, f Filter) ([]Competition, error) {
 
 func (s *Service) Get(ctx context.Context, id int64) (Competition, error) {
 	c, err := s.store.Get(ctx, id)
-	return c, notFound(err)
+	return c, mapErr(err)
 }
 
 func (s *Service) Create(ctx context.Context, in Input) (Competition, error) {
@@ -60,7 +60,7 @@ func (s *Service) Replace(ctx context.Context, id int64, in Input) (Competition,
 	}
 	current, err := s.store.Get(ctx, id)
 	if err != nil {
-		return Competition{}, notFound(err)
+		return Competition{}, mapErr(err)
 	}
 	next := in.apply(Competition{ID: id})
 	return s.update(ctx, current, next)
@@ -70,7 +70,7 @@ func (s *Service) Replace(ctx context.Context, id int64, in Input) (Competition,
 func (s *Service) Patch(ctx context.Context, id int64, in Input) (Competition, error) {
 	current, err := s.store.Get(ctx, id)
 	if err != nil {
-		return Competition{}, notFound(err)
+		return Competition{}, mapErr(err)
 	}
 	return s.update(ctx, current, in.apply(current))
 }
@@ -81,7 +81,7 @@ func (s *Service) update(ctx context.Context, current, next Competition) (Compet
 	}
 	updated, err := s.store.Update(ctx, next)
 	if err != nil {
-		return Competition{}, notFound(err)
+		return Competition{}, mapErr(err)
 	}
 	slog.InfoContext(ctx, "competition updated", "competition_id", updated.ID)
 	return updated, nil
@@ -89,15 +89,22 @@ func (s *Service) update(ctx context.Context, current, next Competition) (Compet
 
 func (s *Service) Delete(ctx context.Context, id int64) error {
 	if err := s.store.Delete(ctx, id); err != nil {
-		return notFound(err)
+		return mapErr(err)
 	}
 	slog.InfoContext(ctx, "competition deleted", "competition_id", id)
 	return nil
 }
 
-func notFound(err error) error {
-	if errors.Is(err, ErrNotFound) {
+// mapErr переводит ошибки хранилища в ошибки, понятные клиенту.
+func mapErr(err error) error {
+	switch {
+	case errors.Is(err, ErrNotFound):
 		return apperr.NotFound("Соревнование не найдено")
+	case errors.Is(err, ErrCapacityBelowApproved):
+		return apperr.Conflict("CAPACITY_BELOW_APPROVED", "Лимит мест не может быть меньше числа одобренных заявок")
+	case errors.Is(err, ErrHasActiveApplications):
+		return apperr.Conflict("HAS_ACTIVE_APPLICATIONS", "У соревнования есть активные заявки, удалить его нельзя")
+	default:
+		return err
 	}
-	return err
 }
