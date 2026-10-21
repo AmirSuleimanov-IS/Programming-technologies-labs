@@ -9,6 +9,7 @@
 | -------------------------------------------------------- | ---------------------- | ------------------------------ |
 | 1. Первичная настройка проекта                           | `lab1-initial-setup`   | [reports/lab_1](reports/lab_1) |
 | 2. Авторизация, ролевая модель, логирование и мониторинг | `lab2-auth-monitoring` | [reports/lab_2](reports/lab_2) |
+| 3. Кэширование                                           | `lab3-caching`         | [reports/lab_3](reports/lab_3) |
 
 `main` — итоговое состояние после последней лабораторной.
 
@@ -43,6 +44,7 @@ docker compose up -d --build
 | Фронтенд (nginx)                   | http://localhost:8091                 |
 | API                                | http://localhost:8090/api             |
 | PostgreSQL                         | localhost:5436 (sportreg / sportreg)  |
+| Redis (кэш)                        | localhost:6381                        |
 | Prometheus                         | http://localhost:9091                 |
 | Grafana (дашборд «SportReg — API») | http://localhost:3001 (admin / admin) |
 
