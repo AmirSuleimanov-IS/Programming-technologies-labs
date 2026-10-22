@@ -1,0 +1,32 @@
+[
+  {
+    "method": "POST",
+    "path": "/auth/register",
+    "quiet": true,
+    "body": {
+      "email": "ivan.petrov@mail.ru",
+      "full_name": "Иван Петров",
+      "password": "Sport2026"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/auth/register",
+    "quiet": true,
+    "body": {
+      "email": "olga.smirnova@mail.ru",
+      "full_name": "Ольга Смирнова",
+      "password": "Chess2026"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/auth/register",
+    "quiet": true,
+    "body": {
+      "email": "maria.kuznetsova@mail.ru",
+      "full_name": "Мария Кузнецова",
+      "password": "Volley2026"
+    }
+  }
+]

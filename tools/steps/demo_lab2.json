@@ -1,0 +1,84 @@
+[
+  {
+    "title": "Каталог без токена — 401",
+    "method": "GET",
+    "path": "/competitions",
+    "headers": ["WWW-Authenticate"]
+  },
+  {
+    "title": "Повторная регистрация того же email (в другом регистре) — 409",
+    "method": "POST",
+    "path": "/auth/register",
+    "body": {
+      "email": "IVAN.PETROV@mail.ru",
+      "full_name": "Иван Петров",
+      "password": "Sport2026"
+    }
+  },
+  {
+    "title": "Слабый пароль и неверный email — 422",
+    "method": "POST",
+    "path": "/auth/register",
+    "body": { "email": "anna@", "full_name": "Анна", "password": "1234567" }
+  },
+  {
+    "title": "Вход с неверным паролем — 401",
+    "method": "POST",
+    "path": "/auth/login",
+    "body": { "email": "ivan.petrov@mail.ru", "password": "wrong-pass1" }
+  },
+  {
+    "title": "Вход пользователя — 200, JWT",
+    "method": "POST",
+    "path": "/auth/login",
+    "saveToken": "user",
+    "pick": ["data.user.email", "data.user.role", "data.expires_at"],
+    "body": { "email": "ivan.petrov@mail.ru", "password": "Sport2026" }
+  },
+  {
+    "method": "POST",
+    "path": "/auth/login",
+    "saveToken": "admin",
+    "quiet": true,
+    "body": { "email": "admin@sportreg.local", "password": "Admin12345" }
+  },
+  {
+    "title": "USER читает каталог — 200",
+    "method": "GET",
+    "path": "/competitions",
+    "token": "user",
+    "pick": ["meta"]
+  },
+  {
+    "title": "USER создаёт соревнование — 403",
+    "method": "POST",
+    "path": "/competitions",
+    "token": "user",
+    "body": {
+      "title": "Мой турнир",
+      "sport": "Шахматы",
+      "location": "Норильск",
+      "starts_on": "2027-01-10",
+      "capacity": 8
+    }
+  },
+  {
+    "title": "USER открывает список пользователей — 403",
+    "method": "GET",
+    "path": "/users",
+    "token": "user"
+  },
+  {
+    "title": "Поддельный токен — 401",
+    "method": "GET",
+    "path": "/competitions",
+    "token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwicm9sZSI6IkFETUlOIn0.forged"
+  },
+  {
+    "title": "ADMIN открывает список пользователей — 200",
+    "method": "GET",
+    "path": "/users",
+    "token": "admin",
+    "pick": ["meta"]
+  }
+]

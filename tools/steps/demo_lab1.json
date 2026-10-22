@@ -1,0 +1,106 @@
+[
+  {
+    "method": "POST",
+    "path": "/auth/login",
+    "saveToken": "admin",
+    "quiet": true,
+    "body": { "email": "admin@sportreg.local", "password": "Admin12345" }
+  },
+  {
+    "title": "Каталог с фильтром (GET)",
+    "method": "GET",
+    "path": "/competitions?sport=Волейбол",
+    "token": "admin",
+    "pick": ["data.0.title", "meta"]
+  },
+  {
+    "title": "Создание (POST) — 201 и заголовок Location",
+    "method": "POST",
+    "path": "/competitions",
+    "token": "admin",
+    "headers": ["Location"],
+    "saveAs": "c",
+    "pick": ["data.id", "data.capacity", "data.description"],
+    "body": {
+      "title": "Демо: турнир по настольному теннису",
+      "sport": "Настольный теннис",
+      "location": "Норильск, спорткомплекс ЗГУ",
+      "starts_on": "2027-03-20",
+      "capacity": 32,
+      "description": "Описание будет стёрто PUT"
+    }
+  },
+  {
+    "title": "Частичное изменение (PATCH) — меняется только лимит",
+    "method": "PATCH",
+    "path": "/competitions/{c}",
+    "token": "admin",
+    "body": { "capacity": 48 },
+    "pick": ["data.capacity", "data.description"]
+  },
+  {
+    "title": "Полная замена (PUT) — описание не передано и стало пустым",
+    "method": "PUT",
+    "path": "/competitions/{c}",
+    "token": "admin",
+    "pick": ["data.title", "data.description"],
+    "body": {
+      "title": "Демо: кубок по настольному теннису",
+      "sport": "Настольный теннис",
+      "location": "Норильск",
+      "starts_on": "2027-03-21",
+      "capacity": 48
+    }
+  },
+  {
+    "title": "Удаление (DELETE) — 204 без тела",
+    "method": "DELETE",
+    "path": "/competitions/{c}",
+    "token": "admin"
+  },
+  {
+    "title": "Чтение удалённого — 404",
+    "method": "GET",
+    "path": "/competitions/{c}",
+    "token": "admin"
+  },
+  {
+    "title": "Ошибки валидации — 422 со списком полей",
+    "method": "POST",
+    "path": "/competitions",
+    "token": "admin",
+    "body": {
+      "title": "Ку",
+      "sport": "Баскетбол",
+      "location": "Норильск",
+      "starts_on": "2025-01-10",
+      "capacity": 0
+    }
+  },
+  {
+    "title": "Некорректный JSON — 400",
+    "method": "POST",
+    "path": "/competitions",
+    "token": "admin",
+    "raw": "{\"title\": "
+  },
+  {
+    "title": "Неизвестное поле — 400",
+    "method": "PATCH",
+    "path": "/competitions/1",
+    "token": "admin",
+    "body": { "titel": "опечатка" }
+  },
+  {
+    "title": "Метод не поддерживается — 405",
+    "method": "DELETE",
+    "path": "/competitions",
+    "token": "admin"
+  },
+  {
+    "title": "Несуществующий маршрут — 404",
+    "method": "GET",
+    "path": "/teams",
+    "token": "admin"
+  }
+]

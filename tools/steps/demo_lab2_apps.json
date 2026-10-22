@@ -1,0 +1,110 @@
+[
+  {
+    "method": "POST",
+    "path": "/auth/login",
+    "saveToken": "admin",
+    "quiet": true,
+    "body": { "email": "admin@sportreg.local", "password": "Admin12345" }
+  },
+  {
+    "method": "POST",
+    "path": "/auth/login",
+    "saveToken": "ivan",
+    "quiet": true,
+    "body": { "email": "ivan.petrov@mail.ru", "password": "Sport2026" }
+  },
+  {
+    "method": "POST",
+    "path": "/auth/login",
+    "saveToken": "olga",
+    "quiet": true,
+    "body": { "email": "olga.smirnova@mail.ru", "password": "Chess2026" }
+  },
+  {
+    "title": "Администратор создаёт соревнование на 1 место",
+    "method": "POST",
+    "path": "/competitions",
+    "token": "admin",
+    "saveAs": "c",
+    "pick": ["data.title", "data.free_places"],
+    "body": {
+      "title": "Демо: финал по шахматам",
+      "sport": "Шахматы",
+      "location": "Норильск",
+      "starts_on": "2027-02-15",
+      "capacity": 1
+    }
+  },
+  {
+    "title": "Иван подаёт заявку — 201, на рассмотрении",
+    "method": "POST",
+    "path": "/applications",
+    "token": "ivan",
+    "saveAs": "a",
+    "pick": ["data.status"],
+    "body": { "competition_id": "{c}" }
+  },
+  {
+    "title": "Повторная заявка — 409",
+    "method": "POST",
+    "path": "/applications",
+    "token": "ivan",
+    "body": { "competition_id": "{c}" }
+  },
+  {
+    "title": "Иван пытается сам одобрить свою заявку — 403",
+    "method": "PATCH",
+    "path": "/applications/{a}",
+    "token": "ivan",
+    "body": { "status": "approved" }
+  },
+  {
+    "title": "Администратор одобряет — 200",
+    "method": "PATCH",
+    "path": "/applications/{a}",
+    "token": "admin",
+    "pick": ["data.status"],
+    "body": { "status": "approved" }
+  },
+  {
+    "title": "Свободных мест не осталось",
+    "method": "GET",
+    "path": "/competitions/{c}",
+    "token": "olga",
+    "pick": ["data.capacity", "data.free_places"]
+  },
+  {
+    "title": "Ольга подаёт заявку — 409, мест нет",
+    "method": "POST",
+    "path": "/applications",
+    "token": "olga",
+    "body": { "competition_id": "{c}" }
+  },
+  {
+    "title": "Удалить соревнование с активной заявкой нельзя — 409",
+    "method": "DELETE",
+    "path": "/competitions/{c}",
+    "token": "admin"
+  },
+  {
+    "title": "Иван отменяет заявку — 200",
+    "method": "PATCH",
+    "path": "/applications/{a}",
+    "token": "ivan",
+    "pick": ["data.status"],
+    "body": { "status": "cancelled" }
+  },
+  {
+    "title": "Отменённую заявку одобрить нельзя — 409",
+    "method": "PATCH",
+    "path": "/applications/{a}",
+    "token": "admin",
+    "body": { "status": "approved" }
+  },
+  {
+    "title": "Теперь соревнование удаляется — 204",
+    "method": "DELETE",
+    "path": "/competitions/{c}",
+    "token": "admin"
+  }
+]

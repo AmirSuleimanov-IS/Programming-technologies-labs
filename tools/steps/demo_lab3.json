@@ -1,0 +1,87 @@
+[
+  {
+    "method": "POST",
+    "path": "/auth/login",
+    "saveToken": "admin",
+    "quiet": true,
+    "body": { "email": "admin@sportreg.local", "password": "Admin12345" }
+  },
+  {
+    "method": "POST",
+    "path": "/competitions",
+    "token": "admin",
+    "saveAs": "c",
+    "quiet": true,
+    "body": {
+      "title": "Демо: кубок по кэшированию",
+      "sport": "Волейбол",
+      "location": "Норильск",
+      "starts_on": "2027-04-01",
+      "capacity": 10
+    }
+  },
+  {
+    "title": "1. Первое чтение — промах, ответ из БД (MISS)",
+    "method": "GET",
+    "path": "/competitions/{c}",
+    "token": "admin",
+    "headers": ["X-Cache"],
+    "time": true,
+    "pick": ["data.title", "meta"]
+  },
+  {
+    "title": "2. Повторное чтение — попадание, ответ из Redis (HIT)",
+    "method": "GET",
+    "path": "/competitions/{c}",
+    "token": "admin",
+    "headers": ["X-Cache"],
+    "time": true,
+    "pick": ["data.title", "meta"]
+  },
+  {
+    "title": "3. Изменение соревнования — кэш сбрасывается",
+    "method": "PATCH",
+    "path": "/competitions/{c}",
+    "token": "admin",
+    "body": { "title": "Демо: кубок по кэшированию (изменён)" },
+    "pick": ["data.title"]
+  },
+  {
+    "title": "4. Чтение после изменения — MISS и новые данные",
+    "method": "GET",
+    "path": "/competitions/{c}",
+    "token": "admin",
+    "headers": ["X-Cache"],
+    "pick": ["data.title", "meta"]
+  },
+  {
+    "title": "5. И снова HIT",
+    "method": "GET",
+    "path": "/competitions/{c}",
+    "token": "admin",
+    "headers": ["X-Cache"],
+    "pick": ["meta"]
+  },
+  {
+    "title": "6. Каталог: первый запрос после изменений — MISS (новая версия списков)",
+    "method": "GET",
+    "path": "/competitions?sport=волейбол",
+    "token": "admin",
+    "headers": ["X-Cache"],
+    "pick": ["meta"]
+  },
+  {
+    "title": "7. Тот же фильтр в другом регистре — HIT (ключ нормализован)",
+    "method": "GET",
+    "path": "/competitions?sport=ВОЛЕЙБОЛ",
+    "token": "admin",
+    "headers": ["X-Cache"],
+    "pick": ["meta"]
+  },
+  {
+    "method": "DELETE",
+    "path": "/competitions/{c}",
+    "token": "admin",
+    "quiet": true
+  }
+]

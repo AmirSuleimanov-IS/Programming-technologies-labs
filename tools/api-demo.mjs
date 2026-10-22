@@ -4,11 +4,12 @@
 //        "saveAs": "имя" (запомнить data.id), "saveToken": "имя" (запомнить data.token),
 //        "short": N (показать N строк тела), "pick": ["data.free_places", "meta"] (показать только эти поля),
 //        "quiet": true (не печатать шаг) }
-// В path и token можно подставлять запомненное: "/competitions/{c1}", "token": "admin".
+// В path и token можно подставлять запомненное: "/competitions/{c1}", "token": "admin";
+// в теле значение "{c1}" заменяется числом: {"competition_id": "{c1}"}.
 // Тело уходит в UTF-8 (curl в Windows портит кириллицу в аргументах).
 import fs from 'node:fs'
 
-const [stepsFile, base = 'http://localhost:8090/api'] = process.argv.slice(2)
+const [stepsFile, base = 'http://127.0.0.1:8090/api'] = process.argv.slice(2)
 const steps = JSON.parse(fs.readFileSync(stepsFile, 'utf8'))
 const saved = {}
 const fill = (s) => s.replace(/\{(\w+)\}/g, (m, k) => (k in saved ? saved[k] : m))
@@ -18,7 +19,8 @@ for (const step of steps) {
   const headers = {}
   let body
   if (step.raw !== undefined) body = step.raw
-  else if (step.body !== undefined) body = JSON.stringify(step.body)
+  else if (step.body !== undefined)
+    body = JSON.stringify(step.body).replace(/"\{(\w+)\}"/g, (m, k) => (k in saved ? String(saved[k]) : m))
   if (body !== undefined) headers['Content-Type'] = 'application/json'
   if (step.token) headers.Authorization = `Bearer ${saved[step.token] ?? step.token}`
 
